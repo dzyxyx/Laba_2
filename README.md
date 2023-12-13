@@ -60,76 +60,160 @@ Sekiro: Shadows Die Twice - это игра с глубоким сюжетом, 
 ![image](https://github.com/dzyxyx/Laba_2/assets/152580474/dcf26cda-ecc0-4852-9f18-4180ddefa7df)
 рисунок 3.
 
+На экономической модели (Рисунок 3) показано, что концентрация связана с здоровьем, т.е. занимает второе место по важности переменных в игре, от нее зависит, как успешное убийство игровых мобов, так и уменьшение хп персонажа. В результате изменения здоровья и концентрации получаем предметы и внутриигровую валюту, которую можно обменивать на предметы/ресурсы.
 
 
 ## Задание 2
-### Должна ли величина loss стремиться к нулю при изменении исходных данных? Ответьте на вопрос, приведите пример выполнения кода, который подтверждает ваш ответ.
+### С помощью скрипта на языке Python заполните google-таблицу данными, описывающими выбранную игровую переменную в выбранной игре (в качестве таких переменных может выступать игровая валюта, ресурсы, здоровье и т.д.). Средствами google-sheets визуализируйте данные в google-таблице (постройте график, диаграмму и пр.) для наглядного представления выбранной игровой величины.
 
-- Перечисленные в этом туториале действия могут быть выполнены запуском на исполнение скрипт-файла, доступного [в репозитории](https://github.com/Den1sovDm1triy/hfss-scripting/blob/main/ScreatingSphereInAEDT.py).
-- Для запуска скрипт-файла откройте Ansys Electronics Desktop. Перейдите во вкладку [Automation] - [Run Script] - [Выберите файл с именем ScreatingSphereInAEDT.py из репозитория].
+Таблица: https://docs.google.com/spreadsheets/d/1mMxjptawbBBYV1FXPN4T2OiBj2aC7FDyNIPXGy2bdCE/edit#gid=0
+
+Исходный код заполнения данных:
 
 ```py
 
-import ScriptEnv
-ScriptEnv.Initialize("Ansoft.ElectronicsDesktop")
-oDesktop.RestoreWindow()
-oProject = oDesktop.NewProject()
-oProject.Rename("C:/Users/denisov.dv/Documents/Ansoft/SphereDIffraction.aedt", True)
-oProject.InsertDesign("HFSS", "HFSSDesign1", "HFSS Terminal Network", "")
-oDesign = oProject.SetActiveDesign("HFSSDesign1")
-oEditor = oDesign.SetActiveEditor("3D Modeler")
-oEditor.CreateSphere(
-	[
-		"NAME:SphereParameters",
-		"XCenter:="		, "0mm",
-		"YCenter:="		, "0mm",
-		"ZCenter:="		, "0mm",
-		"Radius:="		, "1.0770329614269mm"
-	], 
-)
+import gspread
+import numpy as np
+
+gc = gspread.service_account(filename='laba2-408011-e0b10d495c9a.json')
+sh = gc.open("laba2")
+price = np.random.randint(0, 11, 10)
+mon = list(range(1, 11))
+
+# Проверка на достижение до значения 10
+j = 0
+for j in mon:
+    if price[j-1] == 10:
+        price[j] = 0 # Установка последующего значения элемента равному 0
+
+print(price)
+
+i = 0
+tempInf = 0 # задаем начальное значение переменной tempInf
+while i < len(mon):
+    i += 1
+    if i == 1: # для первой итерации цикла
+        tempInf = price[i-1] # значение tempInf равно первому элементу списка price
+    else:
+        tempInf = price[i-1]-price[i-2] # для остальных итераций значение tempInf равно разности текущего и предыдущего элементов списка price
+    sh.sheet1.update(('A' + str(i)), str(i)) # Заполнение ячеек столбца А
+    sh.sheet1.update(('B' + str(i)), str(price[i-1])) # Заполнение ячеек столбца В
+    sh.sheet1.update(('C' + str(i)), str(tempInf)) # Заполнение ячеек столбца С
+    print(price[i-1], tempInf) # Проверка на соответсвие значений, заполняемых в таблице
 
 ```
+У меня не получилось сделать google таблицу, поэтому я разберу код на примере значений, указанных на рисунке 4.
+![image](https://github.com/dzyxyx/Laba_2/assets/152580474/ca7c0120-588c-48d9-bdae-c62a7ac7ff3c)
+Рисунок 4.
+В столбце А указан порядок генерации заполнения шкалы концентрации, столбец B - непосредственно значения концентрации в определенный момент, столбец C - разница между текущим номером и предыдущим, используется для отображения изменения параметра концентрации.
+
+В исходном коде программы происходит генерация чисел для заполнения параметра концентрации в определенный момент времени. Параметр может принимать значения от 0 до 10. При достижении параметром значения 10 происходит обнуление шкалы, т.е происходит вывод персонажа из концентрации и в течении 1-2 секунд игрок не сможет производить действия персонажем. На графике визуально показано изменение параметра.
+
+Так же необходимо было обнулять каждый раз значение параметра концентрации при повторном заполнении таблицы, для этого в коде было прописано начальное значение переменной tempInf = 0.
+
 
 ## Задание 3
-### Какова роль параметра Lr? Ответьте на вопрос, приведите пример выполнения кода, который подтверждает ваш ответ. В качестве эксперимента можете изменить значение параметра.
+### Настройте на сцене Unity воспроизведение звуковых файлов, описывающих динамику изменения выбранной переменной. Например, если выбрано здоровье главного персонажа вы можете выводить сообщения, связанные с его состоянием.
 
-- Перечисленные в этом туториале действия могут быть выполнены запуском на исполнение скрипт-файла, доступного [в репозитории](https://github.com/Den1sovDm1triy/hfss-scripting/blob/main/ScreatingSphereInAEDT.py).
-- Для запуска скрипт-файла откройте Ansys Electronics Desktop. Перейдите во вкладку [Automation] - [Run Script] - [Выберите файл с именем ScreatingSphereInAEDT.py из репозитория].
+Исходный код программы
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+using SimpleJSON;
 
-```py
+public class NewBehaviourScript : MonoBehaviour
+{
+    public AudioClip goodSpeak;
+    public AudioClip normalSpeak;
+    public AudioClip badSpeak;
+    private AudioSource selectAudio;
+    private Dictionary<string,float> dataSet = new Dictionary<string, float>();
+    private bool statusStart = false;
+    private int i = 1;
 
-import ScriptEnv
-ScriptEnv.Initialize("Ansoft.ElectronicsDesktop")
-oDesktop.RestoreWindow()
-oProject = oDesktop.NewProject()
-oProject.Rename("C:/Users/denisov.dv/Documents/Ansoft/SphereDIffraction.aedt", True)
-oProject.InsertDesign("HFSS", "HFSSDesign1", "HFSS Terminal Network", "")
-oDesign = oProject.SetActiveDesign("HFSSDesign1")
-oEditor = oDesign.SetActiveEditor("3D Modeler")
-oEditor.CreateSphere(
-	[
-		"NAME:SphereParameters",
-		"XCenter:="		, "0mm",
-		"YCenter:="		, "0mm",
-		"ZCenter:="		, "0mm",
-		"Radius:="		, "1.0770329614269mm"
-	], 
-)
+    // Start is called before the first frame update
+    void Start()
+    {
+        StartCoroutine(GoogleSheets());
+    }
 
+    // Update is called once per frame
+    void Update()
+    {
+        if(dataSet.Count == 0) return;
+        if (dataSet["Mon_" + i.ToString()] < 0 & statusStart == false & i != dataSet.Count)
+        {
+            StartCoroutine(PlaySelectAudioGood());
+            Debug.Log(dataSet["Mon_" + i.ToString()]);
+        }
+
+        if (dataSet["Mon_" + i.ToString()] >= 0 & dataSet["Mon_" + i.ToString()] < 100 & statusStart == false & i != dataSet.Count)
+        {
+            StartCoroutine(PlaySelectAudioNormal());
+            Debug.Log(dataSet["Mon_" + i.ToString()]);
+        }
+
+        if (dataSet["Mon_" + i.ToString()] > 5 & statusStart == false & i != dataSet.Count)
+        {
+            StartCoroutine(PlaySelectAudioBad());
+            Debug.Log(dataSet["Mon_" + i.ToString()]);
+        }
+    }
+
+    IEnumerator GoogleSheets()
+    {
+        UnityWebRequest curentResp = UnityWebRequest.Get("https://sheets.googleapis.com/v4/spreadsheets/1mMxjptawbBBYV1FXPN4T2OiBj2aC7FDyNIPXGy2bdCE/values/Лист1?key=AIzaSyBTO_SJ4F01pGQUil9dlE0bFU0gFy_8Qp8");
+        yield return curentResp.SendWebRequest();
+        string rawResp = curentResp.downloadHandler.text;
+        var rawJson = JSON.Parse(rawResp);
+        foreach (var itemRawJson in rawJson["values"])
+        {
+            var parseJson = JSON.Parse(itemRawJson.ToString());
+            var selectRow = parseJson[0].AsStringList;
+            dataSet.Add(("Mon_" + selectRow[0]), float.Parse(selectRow[2]));
+        }
+    }
+
+    IEnumerator PlaySelectAudioGood()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = goodSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(3);
+        statusStart = false;
+        i++;
+    }
+    IEnumerator PlaySelectAudioNormal()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = normalSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(3);
+        statusStart = false;
+        i++;
+    }
+    IEnumerator PlaySelectAudioBad()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = badSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(4);
+        statusStart = false;
+        i++;
+    }
+}
 ```
+В данном задании было произведено воспроизведение звуков при изменении значений. При уменьшении значения воспроизводится horosho, при значениях выше нуля воспроизводится звук sredne, при значениях выше 5 воспроизводится звук ploho.
+Для считывания значений было необходимо поменять ссылку на таблицу, которая заполняется значениями, исходя из кода 2го задания и вставить API ключ.
+Так же в коде были изменены условия воспроизведения звуков.
 
-## Выводы
-
-Абзац умных слов о том, что было сделано и что было узнано.
-
-| Plugin | README |
-| ------ | ------ |
-| Dropbox | [plugins/dropbox/README.md][PlDb] |
-| GitHub | [plugins/github/README.md][PlGh] |
-| Google Drive | [plugins/googledrive/README.md][PlGd] |
-| OneDrive | [plugins/onedrive/README.md][PlOd] |
-| Medium | [plugins/medium/README.md][PlMe] |
-| Google Analytics | [plugins/googleanalytics/README.md][PlGa] |
+##Выводы
+- В данной лабораторной работе мы научили заполнять таблицу значениями при помощь языка программирования Python. Так же научились считывать значения из таблицы и исходя из их изменения воспроизводить звуки объекта на Unity.
 
 ## Powered by
 
